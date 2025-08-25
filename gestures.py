@@ -28,6 +28,7 @@ class GestureTracking:
             min_detection_confidence=detection_confidence,
             min_tracking_confidence=tracking_confidence)
         self.positionHandler = positionHandler
+        self.palmPosition = (0, 0)
 
     def distance(self, a, b):
         return hypot(a.x - b.x, a.y - b.y)
@@ -36,7 +37,7 @@ class GestureTracking:
         keyPoints = [[self.landmarks[point.value].x, self.landmarks[point.value].y] for point in PalmPoints]
         return (np.mean(keyPoints, axis=0))
 
-    def run(self):
+    def run(self, isDrawing=True):
         self.frameCount = 0
         while self.cap.isOpened():
             self.frameCount += 1
@@ -56,29 +57,34 @@ class GestureTracking:
             results = self.hands.process(image)
 
             # Draw the hand annotations on the image.
-            image.flags.writeable = True
-            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+            if isDrawing:
+                image.flags.writeable = True
+                image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+                if results.multi_hand_landmarks:
+                    hand_landmarks = results.multi_hand_landmarks[0]
+                    mp_drawing.draw_landmarks(
+                        image,
+                        hand_landmarks,
+                        mp_hands.HAND_CONNECTIONS,
+                        mp_drawing_styles.get_default_hand_landmarks_style(),
+                        mp_drawing_styles.get_default_hand_connections_style())
+
+                    
             if results.multi_hand_landmarks:
-                hand_landmarks = results.multi_hand_landmarks[0]
-                mp_drawing.draw_landmarks(
-                    image,
-                    hand_landmarks,
-                    mp_hands.HAND_CONNECTIONS,
-                    mp_drawing_styles.get_default_hand_landmarks_style(),
-                    mp_drawing_styles.get_default_hand_connections_style())
-
-                self.isPinching = self.distance(hand_landmarks.landmark[THUMB_TIP], hand_landmarks.landmark[INDEX_TIP]) < 0.05
-
-                self.isSecondaryPinching = self.distance(hand_landmarks.landmark[THUMB_TIP], hand_landmarks.landmark[PINKY_TIP]) < 0.05
-
-                self.landmarks = hand_landmarks.landmark
-                palmPosition = self.average_pos()
-                self.positionHandler(palmPosition[0], palmPosition[1], self.isPinching, self.isSecondaryPinching)
+                self.landmarks = results.multi_hand_landmarks[0].landmark
+                self.isPinching = self.distance(self.landmarks[THUMB_TIP], self.landmarks[INDEX_TIP]) < 0.05
+                self.isSecondaryPinching = self.distance(self.landmarks[THUMB_TIP], self.landmarks[PINKY_TIP]) < 0.05
+                self.palmPosition = self.average_pos()
+                self.positionHandler(self.palmPosition[0], self.palmPosition[1], self.isPinching, self.isSecondaryPinching)
+            
+            if isDrawing:
                 # draw a circle at the palm position
                 h, w, c = image.shape
-                cv2.circle(image, (int(palmPosition[0] * w), int(palmPosition[1] * h)), 10, (255, 0, 0), -1)
+                cv2.circle(image, (int(self.palmPosition[0] * w), int(self.palmPosition[1] * h)), 10, (255, 0, 0), -1)
+            
             # Flip the image horizontally for a selfie-view display.
-            cv2.imshow('MediaPipe Hands', cv2.flip(image, 1))
+            if isDrawing:
+                cv2.imshow('MediaPipe Hands', cv2.flip(image, 1))
             if cv2.waitKey(5) & 0xFF == 27:
                 break
         self.cap.release()

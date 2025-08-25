@@ -18,7 +18,7 @@ def gestures_position_handler(x, y, isPinching, isSecondaryPinching):
 
 def main():
     gestures = GestureTracking(gestures_position_handler)
-    gestures.run()
+    gestures.run(False)
 
 
 if __name__ == "__main__":
