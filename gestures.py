@@ -25,6 +25,7 @@ class GestureTracking:
         self.cap = cv2.VideoCapture(camera_index)
         self.hands = mp_hands.Hands(
             model_complexity=0,
+            max_num_hands=1,
             min_detection_confidence=detection_confidence,
             min_tracking_confidence=tracking_confidence)
         self.positionHandler = positionHandler
