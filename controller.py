@@ -8,8 +8,8 @@ class Controller:
 
     def move_cursor(self, x, y):
         screenWidth, screenHeight = pag.size()
-        pag.moveTo(((1 - x) * screenWidth), y * screenHeight)
-    
+        pag.moveTo(((1 - x) * screenWidth), y * screenHeight, duration=0.1, tween=pag.linear)
+
     def mouseDown(self):
         if (self.isClicking):
             return

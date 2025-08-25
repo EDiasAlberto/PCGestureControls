@@ -7,6 +7,9 @@ mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_hands = mp.solutions.hands
 
+FRAMESKIP_COUNT = 1
+FRAMESKIP_MAX = 10
+
 THUMB_TIP = 4
 INDEX_TIP = 8
 PINKY_TIP = 20
@@ -36,14 +39,15 @@ class GestureTracking:
 
     def average_pos(self):
         keyPoints = [[self.landmarks[point.value].x, self.landmarks[point.value].y] for point in PalmPoints]
-        return (np.mean(keyPoints, axis=0))
+        return np.round(np.mean(keyPoints, axis=0), 4)
 
     def run(self, isDrawing=True):
         self.frameCount = 0
         while self.cap.isOpened():
             self.frameCount += 1
-            if self.frameCount % 2 == 0:
-                self.frameCount == 0    
+            if self.frameCount > FRAMESKIP_MAX:
+                self.frameCount = 0
+            if self.frameCount % FRAMESKIP_COUNT != 0:
                 continue
             success, image = self.cap.read()
             if not success:
