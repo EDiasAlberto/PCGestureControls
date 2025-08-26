@@ -1,5 +1,7 @@
 # PC Gesture Controls
 
+> NOTE: webcam video display is disabled for the multithreaded version. If you wish to use this, pull/clone a version prior to multithreading. 
+
 Webcam‑based hand gesture mouse controller. Move your palm to move the cursor. Pinch gestures trigger mouse buttons:
 
 - Thumb + Index pinch (tips closer than ~5% of frame width) => Left mouse button (hold while pinched)
