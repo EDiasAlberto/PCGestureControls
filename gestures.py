@@ -44,7 +44,7 @@ class GestureTracking:
 
     def average_pos(self):
         keyPoints = [[self.landmarks[point.value].x, self.landmarks[point.value].y] for point in PalmPoints]
-        return np.round(np.mean(keyPoints, axis=0), 4)
+        return np.round(np.mean(keyPoints, axis=0), 6)
 
     def run(self, isDrawing=True):
         self.frameCount = 0
